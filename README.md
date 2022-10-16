@@ -9,6 +9,14 @@ API_KEY = ""
 
 ```
 
+Использование
+
+```python 
+
+from anypay import *
+
+```
+
 <h1>Функции</h1>
 
 
