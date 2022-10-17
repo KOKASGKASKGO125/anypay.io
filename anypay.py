@@ -20,10 +20,17 @@ def getCommissions(project_id):
 	responce = requests.get(f"https://anypay.io/api/commissions/{API_ID}?project_id={project_id}", params={"sign":sign.hexdigest()})
 	return responce.text
 
-def getCreatePayment(project_id,pay_id,amount,currency,desc,method,email):
+def getCreatePayment(project_id,amount,currency,desc,method,email):
+
+	pay_id = getLastPayId(project_id)
+
 	sign = hashlib.sha256(f'create-payment{API_ID}{project_id}{pay_id}{amount}{currency}{desc}{method}{API_KEY}'.encode())
 	responce = requests.get(f"https://anypay.io/api/create-payment/{API_ID}?project_id={project_id}&pay_id={pay_id}&amount={amount}&currency={currency}&desc={desc}&method={method}&email={email}", params={"sign":sign.hexdigest()})
-	return responce.text
+	
+	json_dump = json.loads(responce.text)
+	url = json_dump["result"]["payment_url"]
+
+	return url
 
 def getPayments(project_id):
 	sign = hashlib.sha256(f'payments{API_ID}{project_id}{API_KEY}'.encode())
@@ -51,7 +58,15 @@ def checkPay(project_id,comment):
 	current_pay = json_dump["result"]["payments"]
 
 	for i in current_pay:
-		if current_pay[i]["desc"] == comment:
-			return True
+		if current_pay[i]["desc"] == comment and current_pay[i]["status"] == "paid":
+			return True, current_pay[i]["profit"]
 	
-	return False
+	return False,[]
+
+def getLastPayId(project_id):
+	
+	json_dump = json.loads(getPayments(project_id))
+	current_pay = json_dump["result"]["payments"]
+
+	for i in current_pay:
+		return current_pay[i]['pay_id']+1
