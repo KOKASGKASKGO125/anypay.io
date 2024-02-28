@@ -68,5 +68,8 @@ def getLastPayId(project_id):
 	json_dump = json.loads(getPayments(project_id))
 	current_pay = json_dump["result"]["payments"]
 
-	for i in current_pay:
-		return current_pay[i]['pay_id']+1
+	if current_pay != None:
+		for i in current_pay:
+			return current_pay[i]['pay_id']+1
+	else:
+		return 0
